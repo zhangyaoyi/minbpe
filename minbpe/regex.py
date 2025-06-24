@@ -11,7 +11,7 @@ Unlike BasicTokenizer:
 
 import regex as re
 from .base import Tokenizer, get_stats, merge
-
+import time
 
 # the main GPT text split patterns, see
 # https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py
@@ -34,24 +34,47 @@ class RegexTokenizer(Tokenizer):
         self.inverse_special_tokens = {}
 
     def train(self, text, vocab_size, verbose=False):
+        t0 = time.time()
         assert vocab_size >= 256
         num_merges = vocab_size - 256
 
         # split the text up into text chunks
         text_chunks = re.findall(self.compiled_pattern, text)
+        t1 = time.time()
+        if verbose:
+            print(f"Time taken to split text into chunks: {t1 - t0} seconds")
 
+        # count word frequency
+        word_freq = {}
+        for chunk in text_chunks:
+            word_freq[chunk] = word_freq.get(chunk, 0) + 1
+        t2 = time.time()
+        if verbose:
+            print(f"Total unique text chunks: {len(word_freq)}")
+            print(f"Total text chunks before deduplication: {len(text_chunks)}")
+            print(f"Time taken to count word frequency: {t2 - t1} seconds")
+        # remove duplicates from text_chunks
+        text_chunks = list(word_freq.keys())
+        
+        if verbose:
+            print(f"Total text chunks after deduplication: {len(text_chunks)}")
+            print(f"Time taken to remove duplicates: {time.time() - t2} seconds")
         # input text preprocessing
         ids = [list(ch.encode("utf-8")) for ch in text_chunks]
-
+        t3 = time.time()
+        if verbose:
+            print(f"Time taken to encode text chunks: {t3 - t2} seconds")
         # iteratively merge the most common pairs to create new tokens
         merges = {} # (int, int) -> int
         vocab = {idx: bytes([idx]) for idx in range(256)} # idx -> bytes
         for i in range(num_merges):
             # count the number of times every consecutive pair appears
             stats = {}
-            for chunk_ids in ids:
+            for j, chunk_ids in enumerate(ids):
+                # get the corresponding chunk string
+                chunk = text_chunks[j]
                 # passing in stats will update it in place, adding up counts
-                get_stats(chunk_ids, stats)
+                get_stats(chunk_ids, stats, word_freq, chunk)
             # find the pair with the highest count
             pair = max(stats, key=stats.get)
             # mint a new token: assign it the next available id
