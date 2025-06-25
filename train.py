@@ -12,7 +12,8 @@ from minbpe.regex import GPT2_SPLIT_PATTERN
 
 # open some text and train a vocab of 512 tokens
 #text = open("tests/taylorswift.txt", "r", encoding="utf-8").read()
-text = open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8").read()
+#text = open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8").read()
+text = open("data/owt_train.txt", "r", encoding="utf-8").read()
 
 # create a directory for models, so we don't pollute the current directory
 os.makedirs("models", exist_ok=True)
