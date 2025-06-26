@@ -1,8 +1,3 @@
-"""
-Train our Tokenizers on some data, just to see them in action.
-The whole thing runs in ~25 seconds on my laptop.
-"""
-
 import os
 import time
 
@@ -14,7 +9,7 @@ from minbpe.regex import GPT4_SPLIT_PATTERN
 os.makedirs("models", exist_ok=True)
 t0 = time.time()
 
-dataset = "tiny"
+dataset = "owt"
 
 if dataset == "owt":
     text = open("data/owt_train.txt", "r", encoding="utf-8").read()

@@ -12,6 +12,7 @@ Unlike BasicTokenizer:
 import regex as re
 from .base import Tokenizer, get_stats, merge
 import time
+from collections import Counter
 
 # the main GPT text split patterns, see
 # https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py
@@ -45,9 +46,7 @@ class RegexTokenizer(Tokenizer):
             print(f"Time taken to split text into chunks: {t1 - t0} seconds")
 
         # count word frequency
-        word_freq = {}
-        for chunk in text_chunks:
-            word_freq[chunk] = word_freq.get(chunk, 0) + 1
+        word_freq = Counter(text_chunks)
         t2 = time.time()
         if verbose:
             print(f"Total unique text chunks: {len(word_freq)}")
