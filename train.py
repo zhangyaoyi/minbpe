@@ -8,23 +8,23 @@ import time
 
 
 from minbpe import RegexTokenizer
-from minbpe.regex import GPT2_SPLIT_PATTERN
+from minbpe.regex import GPT4_SPLIT_PATTERN
 
 # open some text and train a vocab of 512 tokens
 #text = open("tests/taylorswift.txt", "r", encoding="utf-8").read()
-#text = open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8").read()
-text = open("data/owt_train.txt", "r", encoding="utf-8").read()
+text = open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8").read()
+#text = open("data/owt_train.txt", "r", encoding="utf-8").read()
 
 # create a directory for models, so we don't pollute the current directory
 os.makedirs("models", exist_ok=True)
 
 t0 = time.time()
 # construct the Tokenizer object and kick off verbose training
-tokenizer = RegexTokenizer(GPT2_SPLIT_PATTERN)
-
+tokenizer = RegexTokenizer(GPT4_SPLIT_PATTERN)
+tokenizer.register_special_tokens({"<|endoftext|>": 100257})
 tokenizer.train(text, 10000, verbose=True)
 # writes two files in the models directory: name.model, and name.vocab
-prefix = os.path.join("models", "regex")
+prefix = os.path.join("models", "regex_10k")
 tokenizer.save(prefix)
 t1 = time.time()
 

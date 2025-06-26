@@ -6,3 +6,4 @@ models/**/*
 *.vocab
 /.vscode
 /data
+nohup.out
