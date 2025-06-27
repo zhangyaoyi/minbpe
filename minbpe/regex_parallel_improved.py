@@ -18,9 +18,9 @@ GPT4_SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1
 
 def process_chunk_stats(chunk_data):
     """Process a single chunk's statistics"""
-    chunk_ids, chunk, word_freq = chunk_data
+    chunk_ids, chunk_weight = chunk_data
     stats = {}
-    get_stats(chunk_ids, stats, word_freq, chunk)
+    get_stats(chunk_ids, stats, chunk_weight)
     return stats
 
 
@@ -126,7 +126,7 @@ class ImprovedRegexTokenizer(Tokenizer):
                 merge_start = time.time()
                 
                 # Prepare chunk data for parallel processing
-                chunk_data = [(ids[j], text_chunks[j], word_freq.get(text_chunks[j], 1)) 
+                chunk_data = [(ids[j], word_freq.get(text_chunks[j])) 
                              for j in range(len(ids))]
                 
                 # Use the persistent executor (no recreation overhead!)
