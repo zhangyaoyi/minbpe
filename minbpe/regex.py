@@ -71,9 +71,9 @@ class RegexTokenizer(Tokenizer):
             stats = {}
             for j, chunk_ids in enumerate(ids):
                 # get the corresponding chunk string
-                chunk = text_chunks[j]
+                chunk_weight = word_freq.get(text_chunks[j], 0)
                 # passing in stats will update it in place, adding up counts
-                get_stats(chunk_ids, stats, word_freq, chunk)
+                get_stats(chunk_ids, stats, chunk_weight)
             # find the pair with the highest count
             pair = max(stats, key=stats.get)
             # mint a new token: assign it the next available id
