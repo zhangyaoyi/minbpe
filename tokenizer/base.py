@@ -96,3 +96,16 @@ class Tokenizer:
         for special, idx in self.special_tokens.items():
             vocab[idx] = special.encode("utf-8")
         return vocab
+
+
+def get_stats(ids, counts=None, chunk_weight=1):
+    """
+    Given a list of integers, return a dictionary of counts of consecutive pairs
+    Example: [1, 2, 3, 1, 2] -> {(1, 2): 2, (2, 3): 1, (3, 1): 1}
+    Optionally allows to update an existing dictionary of counts
+    """
+    counts = {} if counts is None else counts
+
+    for pair in zip(ids, ids[1:]): # iterate consecutive elements
+        counts[pair] = counts.get(pair, 0) + chunk_weight
+    return counts

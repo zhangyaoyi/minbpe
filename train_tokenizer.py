@@ -1,8 +1,14 @@
 import os
 import time
 
-
 from tokenizer import RegexTokenizer
+from tokenizer.logging import setup_logging, get_logger
+
+# Setup shared logging configuration (only done once globally)
+setup_logging()
+
+# Get logger for this module
+logger = get_logger(__name__)
 
 # create a directory for models, so we don't pollute the current directory
 os.makedirs("models", exist_ok=True)
@@ -20,20 +26,20 @@ elif dataset == "tiny":
     model_name = "regex_10k"
 
 t1 = time.time()
-print(f"Loaded text in {t1 - t0:.2f} seconds")
+logger.info(f"Loaded text in {t1 - t0:.2f} seconds")
 
 # construct the Tokenizer object and kick off verbose training
-tokenizer = RegexTokenizer(max_workers=32, batch_size=50000)
+tokenizer = RegexTokenizer(max_workers=16, batch_size=400000)
 tokenizer.register_special_tokens({"<|endoftext|>": 100257})
 
-print(f"Training tokenizer")
+logger.info(f"Training tokenizer")
 tokenizer.train(text, vocab_size, verbose=True)
 t2 = time.time()
-print(f"Trained tokenizer in {t2 - t1:.2f} seconds")
+logger.info(f"Trained tokenizer in {t2 - t1:.2f} seconds")
 # writes two files in the models directory: name.model, and name.vocab
 prefix = os.path.join("models", model_name)
 tokenizer.save(prefix)
 t3 = time.time()
-print(f"Saved tokenizer in {t3 - t2:.2f} seconds")
+logger.info(f"Saved tokenizer in {t3 - t2:.2f} seconds")
 
-print(f"Total time: {t3 - t0:.2f} seconds")
+logger.info(f"Total time: {t3 - t0:.2f} seconds")

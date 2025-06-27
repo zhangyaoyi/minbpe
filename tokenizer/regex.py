@@ -1,9 +1,13 @@
-from tokenizer.base import Tokenizer
+from tokenizer.base import Tokenizer, get_stats
 import multiprocessing as mp
 import regex as re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import time
 from collections import Counter, defaultdict
+from tokenizer.logging import get_logger
+
+# Get logger for this module using shared configuration
+logger = get_logger(__name__)
 
 GPT4_SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,3}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
 
@@ -38,33 +42,32 @@ class RegexTokenizer(Tokenizer):
             text_chunks = re.findall(self.compiled_pattern, text)
             t1 = time.time()
             if verbose:
-                print(f"Total text chunks before deduplication: {len(text_chunks)}")
-                print(f"Time taken to split text into chunks: {t1 - t0:.2f} seconds")
+                logger.info(f"Total text chunks before deduplication: {len(text_chunks)}")
+                logger.info(f"Time taken to split text into chunks: {t1 - t0:.2f} seconds")
 
             # step 2: count word frequency, for example, ["hello", "world"] -> {"hello": 1, "world": 1}
             chunk_freq = Counter(text_chunks)
             t2 = time.time()
             if verbose:
-                print(f"Time taken to count word frequency: {t2 - t1:.2f} seconds")
+                logger.info(f"Time taken to count word frequency: {t2 - t1:.2f} seconds")
 
             # step 3: deduplicate chunks, for example, ["hello", "world", "hello"] -> ["hello", "world"]
             text_chunks = list(chunk_freq.keys())
             t3 = time.time()
             if verbose:
-                print(f"Total unique text chunks after deduplication: {len(text_chunks)}")
-                print(f"Time taken to deduplicate chunks: {t3 - t2:.2f} seconds")
+                logger.info(f"Total unique text chunks after deduplication: {len(text_chunks)}")
+                logger.info(f"Time taken to deduplicate chunks: {t3 - t2:.2f} seconds")
 
             # step 4: encode chunks with UTF-8, for example, ["hello", " world"] -> [[104, 101, 108, 108, 111], [32, 119, 111, 114, 108, 100]]
             ids = [list(ch.encode("utf-8")) for ch in text_chunks]
             t4 = time.time()
             if verbose:
-                print(f"Time taken to encode chunks: {t4 - t3:.2f} seconds")
+                logger.info(f"Time taken to encode chunks: {t4 - t3:.2f} seconds")
 
             # step 5: initialize persistent process pool
             self._get_executor()
 
             # step 6: iteratively merge the most common pairs
-            t_merge_start = time.time()
             merges = {}
             vocab = {idx: bytes([idx]) for idx in range(256)}
             
@@ -206,7 +209,9 @@ def process_chunk_batch(batch_data):
     for chunk_ids, chunk_freq in batch_data:
         for i in range(len(chunk_ids) - 1):
             pair = (chunk_ids[i], chunk_ids[i + 1])
-            stats[pair] += chunk_freq    
+            stats[pair] += chunk_freq   
+
+    logger.info(f"finished processing batch")
     return stats
 
 def merge(ids, pair, idx):

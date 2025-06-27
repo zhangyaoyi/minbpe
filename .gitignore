@@ -7,3 +7,4 @@ models/**/*
 /.vscode
 /data
 training.log
+logs/
