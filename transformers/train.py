@@ -91,7 +91,7 @@ if __name__ == "__main__":
     )
     
     # 3. 保存分词器
-    save_directory = "bpe_tokenizer"
+    save_directory = "models/transformers"
     save_tokenizer(tokenizer, save_directory)
     
     # 4. 加载并测试分词器
