@@ -20,16 +20,20 @@ if dataset == "owt":
     text = open("data/owt_train.txt", "r", encoding="utf-8").read()
     vocab_size = 32000
     model_name = "regex_32k"
+    batch_size = 200000
+    max_workers = 32
 elif dataset == "tiny":
     text = open("data/TinyStoriesV2-GPT4-train.txt", "r", encoding="utf-8").read()
     vocab_size = 10000
     model_name = "regex_10k"
+    batch_size = 10000
+    max_workers = 16
 
 t1 = time.time()
 logger.info(f"Loaded text in {t1 - t0:.2f} seconds")
 
 # construct the Tokenizer object and kick off verbose training
-tokenizer = RegexTokenizer(max_workers=16, batch_size=400000)
+tokenizer = RegexTokenizer(max_workers=max_workers, batch_size=batch_size)
 tokenizer.register_special_tokens({"<|endoftext|>": 100257})
 
 logger.info(f"Training tokenizer")
