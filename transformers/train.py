@@ -22,9 +22,10 @@ def train_bpe_tokenizer(corpus_files, vocab_size=30000, min_frequency=2):
     
     # 5. 配置训练器
     trainer = trainers.BpeTrainer(
-        vocab_size=vocab_size,
-        min_frequency=min_frequency,
-        special_tokens=["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"]
+        show_progress=True, # type: ignore
+        vocab_size=vocab_size,  # type: ignore
+        min_frequency=min_frequency,  # type: ignore
+        special_tokens=["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]", "<|endoftext|>"] # type: ignore
     )
     
     # 6. 训练分词器
@@ -51,6 +52,7 @@ def save_tokenizer(tokenizer, save_directory):
         cls_token="[CLS]",
         sep_token="[SEP]",
         mask_token="[MASK]",
+        eot_token="<|endoftext|>",
     )
     
     fast_tokenizer.save_pretrained(save_directory)
@@ -99,10 +101,10 @@ if __name__ == "__main__":
     
     # 5. 测试分词效果
     test_texts = [
-        "Hello, how are you doing today?",
-        "This is a test sentence for tokenization.",
-        "自然语言处理很有趣！",
-        "BPE tokenizer works well for subword units."
+        "Hello, how are you doing today?<|endoftext|>",
+        "This is a test sentence for tokenization.<|endoftext|>",
+        "自然语言处理很有趣！<|endoftext|>",
+        "BPE tokenizer works well for subword units.<|endoftext|>"
     ]
     
     test_tokenizer(loaded_tokenizer, test_texts)
